@@ -1,5 +1,6 @@
-import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import { defineConfig } from 'vite'
+import { tanstackStart } from '@tanstack/react-start/plugin/vite'
+import { cloudflare } from '@cloudflare/vite-plugin'
 import tsConfigPaths from 'vite-tsconfig-paths'
 import tailwindcss from '@tailwindcss/vite'
 import viteReact from '@vitejs/plugin-react'
@@ -10,13 +11,15 @@ export default defineConfig({
     allowedHosts: true,
   },
   plugins: [
+    cloudflare({ viteEnvironment: { name: 'ssr' } }),
     tailwindcss(),
     tsConfigPaths({
       projects: ['./tsconfig.json'],
     }),
     tanstackStart({
-      server: {
-        preset: 'cloudflare-pages'
+      prerender: {
+        routes: ['/'],
+        crawlLinks: true
       }
     }),
     viteReact(),

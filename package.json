@@ -31,6 +31,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.31.2",
     "@convex-dev/eslint-plugin": "^1.1.1",
     "@tailwindcss/vite": "^4.1.18",
     "@tanstack/eslint-config": "^0.3.4",
