@@ -1,6 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Calendar, Clock, MapPin, Phone, MessageSquare, Shield, Zap, Coffee, Users, CheckCircle2, Sun, Moon, Instagram, Facebook } from 'lucide-react'
 import { useState } from "react";
+import { useSuspenseQuery, useMutation, queryOptions } from "@tanstack/react-query";
+import { getBookingsByDate, createBooking } from "../server/bookings";
 
 export const Route = createFileRoute('/')({
   head: () => ({
@@ -9,6 +11,9 @@ export const Route = createFileRoute('/')({
       { name: 'description', content: 'Experience football like never before at Dribblex Turf. Now Activated!' }
     ]
   }),
+  loader: ({ context, params }) => {
+    // We can pre-fetch if we want, but selectedDate is dynamic in the client
+  },
   component: Home,
 })
 
@@ -17,8 +22,19 @@ function Home() {
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [bookingStep, setBookingStep] = useState(1);
   
-  // Dummy data for now - will be replaced with D1 queries
-  const [existingBookings] = useState<any[]>([]);
+  const bookingsQuery = queryOptions({
+    queryKey: ['bookings', selectedDate],
+    queryFn: () => getBookingsByDate({ data: selectedDate }),
+  })
+
+  const { data: existingBookings } = useSuspenseQuery(bookingsQuery);
+
+  const bookingMutation = useMutation({
+    mutationFn: (data: Parameters<typeof createBooking>[0]['data']) => createBooking({ data }),
+    onSuccess: () => {
+      setBookingStep(3);
+    }
+  });
 
   const [formData, setFormData] = useState({
     name: '',
@@ -63,9 +79,13 @@ function Home() {
     e.preventDefault();
     if (!formData.name || !formData.phone || !formData.startTime) return;
     
-    // Will implement D1 booking creation here
-    console.log("Booking requested for D1:", formData);
-    setBookingStep(3);
+    bookingMutation.mutate({
+      name: formData.name,
+      phone: formData.phone,
+      date: selectedDate,
+      startTime: formData.startTime,
+      duration: 1.5
+    });
   };
 
   const today = new Date().toISOString().split('T')[0];
