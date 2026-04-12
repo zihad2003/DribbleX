@@ -14,14 +14,19 @@ export interface Booking {
 }
 
 // Fallback type for D1 in case global types haven't synced
+// Fallback type for D1 in case global types haven't synced
 interface D1Database {
-  prepare: (query: string) => any;
+  prepare: (query: string) => {
+    bind: (...args: any[]) => any;
+    all: <T = any>() => Promise<{ results: T[] }>;
+    run: () => Promise<any>;
+  };
 }
 
 // Fetch bookings for a specific date
 export const getBookingsByDate = createServerFn({ method: 'GET' })
   .validator((date: string) => date)
-  .handler(async ({ data: date }) => {
+  .handler(async ({ data: date }: { data: string }) => {
     const event = getEvent()
     const env = (event.context.cloudflare?.env || {}) as any
     const db = env.DB as D1Database
@@ -48,7 +53,13 @@ export const createBooking = createServerFn({ method: 'POST' })
     startTime: string;
     duration: number;
   }) => data)
-  .handler(async ({ data }) => {
+  .handler(async ({ data }: { data: {
+    name: string;
+    phone: string;
+    date: string;
+    startTime: string;
+    duration: number;
+  } }) => {
     const event = getEvent()
     const env = (event.context.cloudflare?.env || {}) as any
     const db = env.DB as D1Database
@@ -90,7 +101,7 @@ export const getAllBookings = createServerFn({ method: 'GET' })
 // Update booking status
 export const updateBookingStatus = createServerFn({ method: 'POST' })
   .validator((data: { id: number; status: string }) => data)
-  .handler(async ({ data }) => {
+  .handler(async ({ data }: { data: { id: number; status: string } }) => {
     const event = getEvent()
     const env = (event.context.cloudflare?.env || {}) as any
     const db = env.DB as D1Database

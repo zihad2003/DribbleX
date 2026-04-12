@@ -11,7 +11,7 @@ export const Route = createFileRoute('/')({
       { name: 'description', content: 'Experience football like never before at Dribblex Turf. Now Activated!' }
     ]
   }),
-  loader: ({ context, params }) => {
+  loader: () => {
     // We can pre-fetch if we want, but selectedDate is dynamic in the client
   },
   component: Home,
@@ -123,7 +123,7 @@ function Home() {
                     </label>
                     <div className="grid grid-cols-2 gap-2 mb-4">
                       {daySlots.map(slot => {
-                        const isBooked = existingBookings.some(b => b.startTime === slot && b.status !== 'cancelled');
+                        const isBooked = existingBookings.some((b: any) => b.startTime === slot && b.status !== 'cancelled');
                         const isPast = isSlotPast(slot);
                         const isDisabled = isBooked || isPast;
                         return (
@@ -152,7 +152,7 @@ function Home() {
                     </label>
                     <div className="grid grid-cols-2 gap-2">
                       {nightSlots.map(slot => {
-                        const isBooked = existingBookings.some(b => b.startTime === slot && b.status !== 'cancelled');
+                        const isBooked = existingBookings.some((b: any) => b.startTime === slot && b.status !== 'cancelled');
                         const isPast = isSlotPast(slot);
                         const isDisabled = isBooked || isPast;
                         return (

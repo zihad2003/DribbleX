@@ -26,8 +26,8 @@ function AdminPage() {
 
   const stats = {
     total: bookings.length,
-    pending: bookings.filter(b => b.status === 'pending').length,
-    confirmed: bookings.filter(b => b.status === 'confirmed').length,
+    pending: bookings.filter((b: any) => b.status === 'pending').length,
+    confirmed: bookings.filter((b: any) => b.status === 'confirmed').length,
   };
 
   return (
@@ -69,7 +69,7 @@ function AdminPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/5">
-                {bookings.map((booking) => (
+                {bookings.map((booking: any) => (
                   <tr key={booking.id} className="hover:bg-white/[0.02] transition-colors group">
                     <td className="px-6 py-6">
                       <div className="flex items-center gap-3">
