@@ -13,19 +13,30 @@ export interface Booking {
   created_at: string;
 }
 
+// Fallback type for D1 in case global types haven't synced
+interface D1Database {
+  prepare: (query: string) => any;
+}
+
 // Fetch bookings for a specific date
 export const getBookingsByDate = createServerFn({ method: 'GET' })
   .validator((date: string) => date)
   .handler(async ({ data: date }) => {
     const event = getEvent()
-    const db = event.context.cloudflare.env.DB as D1Database
+    const env = (event.context.cloudflare?.env || {}) as any
+    const db = env.DB as D1Database
+
+    if (!db) {
+      console.warn("DB binding not found. Returning empty results.");
+      return [];
+    }
 
     const { results } = await db
       .prepare('SELECT * FROM bookings WHERE date = ? AND status != "cancelled"')
       .bind(date)
       .all<Booking>()
 
-    return results
+    return results || []
   })
 
 // Create a new booking
@@ -39,7 +50,13 @@ export const createBooking = createServerFn({ method: 'POST' })
   }) => data)
   .handler(async ({ data }) => {
     const event = getEvent()
-    const db = event.context.cloudflare.env.DB as D1Database
+    const env = (event.context.cloudflare?.env || {}) as any
+    const db = env.DB as D1Database
+
+    if (!db) {
+      console.warn("DB binding not found.");
+      return { success: false };
+    }
 
     await db
       .prepare(
@@ -55,13 +72,19 @@ export const createBooking = createServerFn({ method: 'POST' })
 export const getAllBookings = createServerFn({ method: 'GET' })
   .handler(async () => {
     const event = getEvent()
-    const db = event.context.cloudflare.env.DB as D1Database
+    const env = (event.context.cloudflare?.env || {}) as any
+    const db = env.DB as D1Database
+
+    if (!db) {
+      console.warn("DB binding not found.");
+      return [];
+    }
 
     const { results } = await db
       .prepare('SELECT * FROM bookings ORDER BY created_at DESC')
       .all<Booking>()
 
-    return results
+    return results || []
   })
 
 // Update booking status
@@ -69,7 +92,13 @@ export const updateBookingStatus = createServerFn({ method: 'POST' })
   .validator((data: { id: number; status: string }) => data)
   .handler(async ({ data }) => {
     const event = getEvent()
-    const db = event.context.cloudflare.env.DB as D1Database
+    const env = (event.context.cloudflare?.env || {}) as any
+    const db = env.DB as D1Database
+
+    if (!db) {
+      console.warn("DB binding not found.");
+      return { success: false };
+    }
 
     await db
       .prepare('UPDATE bookings SET status = ? WHERE id = ?')

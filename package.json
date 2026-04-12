@@ -4,14 +4,12 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "dev": "npx convex dev --once && concurrently -r npm:dev:web npm:dev:convex",
-    "dev:web": "vite dev",
+    "dev": "vite",
     "dev:ts": "tsc -b -w",
-    "dev:convex": "npx convex dev",
     "build": "vite build && tsc --noEmit",
     "start": "node .output/public/_worker.js",
     "format": "prettier --write .",
-    "lint": "tsc && eslint .  --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "tsc && eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
   },
   "dependencies": {
     "@auth/core": "0.37.4",
