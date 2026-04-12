@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "vite",
     "dev:ts": "tsc -b -w",
-    "build": "vite build && tsc --noEmit",
+    "build": "vite build",
     "start": "node .output/public/_worker.js",
     "format": "prettier --write .",
     "lint": "tsc && eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0"
