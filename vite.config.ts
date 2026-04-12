@@ -6,6 +6,26 @@ import tailwindcss from '@tailwindcss/vite'
 import viteReact from '@vitejs/plugin-react'
 
 export default defineConfig({
+  build: {
+    outDir: '.output',
+  },
+  environments: {
+    client: {
+      build: {
+        outDir: '.output/public',
+      },
+    },
+    ssr: {
+      build: {
+        outDir: '.output/server',
+        rollupOptions: {
+          output: {
+            entryFileNames: 'index.mjs',
+          },
+        },
+      },
+    },
+  },
   server: {
     port: 3000,
     allowedHosts: true,
