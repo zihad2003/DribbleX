@@ -1,9 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { Calendar, Clock, MapPin, Phone, MessageSquare, Shield, Zap, Coffee, Users, CheckCircle2, Sun, Moon, Instagram, Facebook } from 'lucide-react'
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { convexQuery } from "@convex-dev/react-query";
-import { useMutation } from "convex/react";
-import { api } from "../../convex/_generated/api";
 import { useState } from "react";
 
 export const Route = createFileRoute('/')({
@@ -20,12 +16,9 @@ function Home() {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
   const [bookingStep, setBookingStep] = useState(1);
-
-  const { data: existingBookings } = useSuspenseQuery(
-    convexQuery(api.bookings.getBookingsByDate, { date: selectedDate })
-  );
-
-  const createBooking = useMutation(api.bookings.createBooking);
+  
+  // Dummy data for now - will be replaced with D1 queries
+  const [existingBookings] = useState<any[]>([]);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -52,12 +45,9 @@ function Home() {
     const [hours, minutes] = start.split(':').map(Number);
     
     let slotHours = hours;
-    // Map of specific slots to their 24h start hour
-    // Day: 07:00, 08:35, 10:10, 11:45, 01:20, 02:55, 04:30
-    // Night: 06:05, 07:40, 09:15, 10:50
-    if (hours >= 1 && hours <= 6) slotHours += 12; // 01, 02, 04, 06 PM
+    if (hours >= 1 && hours <= 6) slotHours += 12; 
     if (hours >= 7 && hours <= 11 && (slot.includes('07:40') || slot.includes('09:15') || slot.includes('10:50'))) {
-      slotHours += 12; // 07, 09, 10 PM
+      slotHours += 12;
     }
 
     const now = new Date();
@@ -73,13 +63,8 @@ function Home() {
     e.preventDefault();
     if (!formData.name || !formData.phone || !formData.startTime) return;
     
-    await createBooking({
-      name: formData.name,
-      phone: formData.phone,
-      date: selectedDate,
-      startTime: formData.startTime,
-      duration: 1.5
-    });
+    // Will implement D1 booking creation here
+    console.log("Booking requested for D1:", formData);
     setBookingStep(3);
   };
 
