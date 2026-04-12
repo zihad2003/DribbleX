@@ -13,19 +13,13 @@ export interface Booking {
   created_at: string;
 }
 
-// Fallback type for D1 in case global types haven't synced
-// Fallback type for D1 in case global types haven't synced
+// Fallback type for D1
 interface D1Database {
-  prepare: (query: string) => {
-    bind: (...args: any[]) => any;
-    all: <T = any>() => Promise<{ results: T[] }>;
-    run: () => Promise<any>;
-  };
+  prepare: (query: string) => any;
 }
 
 // Fetch bookings for a specific date
 export const getBookingsByDate = createServerFn({ method: 'GET' })
-  .validator((date: string) => date)
   .handler(async ({ data: date }: { data: string }) => {
     const event = getEvent()
     const env = (event.context.cloudflare?.env || {}) as any
@@ -36,23 +30,15 @@ export const getBookingsByDate = createServerFn({ method: 'GET' })
       return [];
     }
 
-    const { results } = await db
+    const { results } = await (db
       .prepare('SELECT * FROM bookings WHERE date = ? AND status != "cancelled"')
-      .bind(date)
-      .all<Booking>()
+      .bind(date) as any).all<Booking>()
 
     return results || []
   })
 
 // Create a new booking
 export const createBooking = createServerFn({ method: 'POST' })
-  .validator((data: {
-    name: string;
-    phone: string;
-    date: string;
-    startTime: string;
-    duration: number;
-  }) => data)
   .handler(async ({ data }: { data: {
     name: string;
     phone: string;
@@ -69,12 +55,11 @@ export const createBooking = createServerFn({ method: 'POST' })
       return { success: false };
     }
 
-    await db
+    await (db
       .prepare(
         'INSERT INTO bookings (name, phone, date, startTime, duration) VALUES (?, ?, ?, ?, ?)'
       )
-      .bind(data.name, data.phone, data.date, data.startTime, data.duration)
-      .run()
+      .bind(data.name, data.phone, data.date, data.startTime, data.duration) as any).run()
 
     return { success: true }
   })
@@ -91,16 +76,14 @@ export const getAllBookings = createServerFn({ method: 'GET' })
       return [];
     }
 
-    const { results } = await db
-      .prepare('SELECT * FROM bookings ORDER BY created_at DESC')
-      .all<Booking>()
+    const { results } = await (db
+      .prepare('SELECT * FROM bookings ORDER BY created_at DESC') as any).all<Booking>()
 
     return results || []
   })
 
 // Update booking status
 export const updateBookingStatus = createServerFn({ method: 'POST' })
-  .validator((data: { id: number; status: string }) => data)
   .handler(async ({ data }: { data: { id: number; status: string } }) => {
     const event = getEvent()
     const env = (event.context.cloudflare?.env || {}) as any
@@ -111,10 +94,9 @@ export const updateBookingStatus = createServerFn({ method: 'POST' })
       return { success: false };
     }
 
-    await db
+    await (db
       .prepare('UPDATE bookings SET status = ? WHERE id = ?')
-      .bind(data.status, data.id)
-      .run()
+      .bind(data.status, data.id) as any).run()
 
     return { success: true }
   })
