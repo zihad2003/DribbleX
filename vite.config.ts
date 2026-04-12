@@ -7,7 +7,7 @@ import viteReact from '@vitejs/plugin-react'
 
 export default defineConfig({
   build: {
-    outDir: '.output',
+    outDir: '.output/public',
   },
   environments: {
     client: {
@@ -17,10 +17,10 @@ export default defineConfig({
     },
     ssr: {
       build: {
-        outDir: '.output/server',
+        outDir: '.output/public',
         rollupOptions: {
           output: {
-            entryFileNames: 'index.mjs',
+            entryFileNames: '_worker.js',
           },
         },
       },
