@@ -50,3 +50,31 @@ export const createBooking = createServerFn({ method: 'POST' })
 
     return { success: true }
   })
+
+// Fetch all bookings (for Admin)
+export const getAllBookings = createServerFn({ method: 'GET' })
+  .handler(async () => {
+    const event = getEvent()
+    const db = event.context.cloudflare.env.DB as D1Database
+
+    const { results } = await db
+      .prepare('SELECT * FROM bookings ORDER BY created_at DESC')
+      .all<Booking>()
+
+    return results
+  })
+
+// Update booking status
+export const updateBookingStatus = createServerFn({ method: 'POST' })
+  .validator((data: { id: number; status: string }) => data)
+  .handler(async ({ data }) => {
+    const event = getEvent()
+    const db = event.context.cloudflare.env.DB as D1Database
+
+    await db
+      .prepare('UPDATE bookings SET status = ? WHERE id = ?')
+      .bind(data.status, data.id)
+      .run()
+
+    return { success: true }
+  })

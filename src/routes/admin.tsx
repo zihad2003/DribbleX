@@ -1,8 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useSuspenseQuery } from "@tanstack/react-query";
-import { convexQuery } from "@convex-dev/react-query";
-import { useMutation } from "convex/react";
-import { api } from "../../convex/_generated/api";
+import { useSuspenseQuery, useMutation, useQueryClient, queryOptions } from "@tanstack/react-query";
+import { getAllBookings, updateBookingStatus } from "../server/bookings";
 import { CheckCircle, XCircle, Clock, Phone, User, Calendar as CalendarIcon } from 'lucide-react';
 
 export const Route = createFileRoute('/admin')({
@@ -10,8 +8,21 @@ export const Route = createFileRoute('/admin')({
 })
 
 function AdminPage() {
-  const { data: bookings } = useSuspenseQuery(convexQuery(api.bookings.getAllBookings, {}));
-  const updateStatus = useMutation(api.bookings.updateBookingStatus);
+  const queryClient = useQueryClient();
+  
+  const adminBookingsQuery = queryOptions({
+    queryKey: ['admin', 'bookings'],
+    queryFn: () => getAllBookings(),
+  })
+
+  const { data: bookings } = useSuspenseQuery(adminBookingsQuery);
+
+  const statusMutation = useMutation({
+    mutationFn: (data: Parameters<typeof updateBookingStatus>[0]['data']) => updateBookingStatus({ data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'bookings'] });
+    }
+  });
 
   const stats = {
     total: bookings.length,
@@ -59,7 +70,7 @@ function AdminPage() {
               </thead>
               <tbody className="divide-y divide-white/5">
                 {bookings.map((booking) => (
-                  <tr key={booking._id} className="hover:bg-white/[0.02] transition-colors group">
+                  <tr key={booking.id} className="hover:bg-white/[0.02] transition-colors group">
                     <td className="px-6 py-6">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-slate-800 rounded-full flex items-center justify-center">
@@ -102,7 +113,7 @@ function AdminPage() {
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         {booking.status !== 'confirmed' && (
                           <button 
-                            onClick={() => updateStatus({ id: booking._id, status: 'confirmed' })}
+                            onClick={() => statusMutation.mutate({ id: booking.id, status: 'confirmed' })}
                             className="p-2 bg-lime-400/10 text-lime-400 rounded-lg hover:bg-lime-400 hover:text-black transition-all"
                             title="Confirm Booking"
                           >
@@ -111,7 +122,7 @@ function AdminPage() {
                         )}
                         {booking.status !== 'cancelled' && (
                           <button 
-                            onClick={() => updateStatus({ id: booking._id, status: 'cancelled' })}
+                            onClick={() => statusMutation.mutate({ id: booking.id, status: 'cancelled' })}
                             className="p-2 bg-red-400/10 text-red-400 rounded-lg hover:bg-red-400 hover:text-white transition-all"
                             title="Cancel Booking"
                           >
