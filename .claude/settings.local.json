@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(ls D:/Dribblex_Turf/*.ts D:/Dribblex_Turf/*.toml D:/Dribblex_Turf/*.json)",
+      "Bash(ls D:/Dribblex_Turf/*.ts D:/Dribblex_Turf/*.md)"
+    ]
+  }
+}
