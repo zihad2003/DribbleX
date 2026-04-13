@@ -26,4 +26,4 @@ node_modules
 
 app.config.timestamp_*.js
 .wrangler/
-.output/
+package-lock.json
