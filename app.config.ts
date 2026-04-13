@@ -1,4 +1,4 @@
-import { defineConfig } from '@tanstack/react-start/config'
+import { defineConfig } from '@tanstack/react-start'
 import tsConfigPaths from 'vite-tsconfig-paths'
 import tailwindcss from '@tailwindcss/vite'
 
@@ -7,7 +7,7 @@ export default defineConfig({
     preset: 'cloudflare-pages',
   },
   vite: {
-    plugins: () => [
+    plugins: [
       tailwindcss(),
       tsConfigPaths({
         projects: ['./tsconfig.json'],
