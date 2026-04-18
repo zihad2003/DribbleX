@@ -1,6 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import * as React from "react";
-import { useState } from "react";
+import { useState, Suspense } from "react";
+import { useSuspenseQuery, useMutation, queryOptions, useQueryClient } from "@tanstack/react-query";
+import { getBookingsByDate, createBooking } from "../server/bookings";
 import { Navbar } from "../components/Navbar";
 import { Hero } from "../components/Hero";
 import { Facilities } from "../components/Facilities";
@@ -10,7 +12,7 @@ import { Testimonials } from "../components/Testimonials";
 import { FAQ } from "../components/FAQ";
 import { Footer } from "../components/Footer";
 import { BookingModal } from "../components/BookingModal";
-import { MessageCircle } from 'lucide-react';
+import { MessageCircle, Loader2 } from 'lucide-react';
 
 export const Route = createFileRoute('/')({
   head: () => ({
@@ -19,8 +21,20 @@ export const Route = createFileRoute('/')({
       { name: 'description', content: 'Experience football like never before at Dribblex Turf. Elite FIFA-grade arena now activated in Dhaka.' }
     ]
   }),
-  component: Home,
+  component: HomeWrapper,
 })
+
+function HomeWrapper() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <Loader2 className="w-10 h-10 text-lime-400 animate-spin" />
+      </div>
+    }>
+      <Home />
+    </Suspense>
+  )
+}
 
 const daySlots = [
   "07:00 - 08:30", "08:35 - 10:05", "10:10 - 11:40", "11:45 - 01:15", 
@@ -34,12 +48,21 @@ const nightSlots = [
 function Home() {
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [isBookingOpen, setIsBookingOpen] = useState(false);
-  
-  // Mock data for frontend-only view
-  const existingBookings = [
-    { id: 1, startTime: "08:35 - 10:05", date: "2026-04-18", status: 'confirmed' },
-    { id: 2, startTime: "06:05 - 07:35", date: "2026-04-18", status: 'confirmed' }
-  ];
+  const queryClient = useQueryClient();
+
+  const bookingsQuery = queryOptions({
+    queryKey: ['bookings', selectedDate],
+    queryFn: () => getBookingsByDate({ data: selectedDate }),
+  })
+
+  const { data: existingBookings = [] } = useSuspenseQuery(bookingsQuery);
+
+  const bookingMutation = useMutation({
+    mutationFn: (data: Parameters<typeof createBooking>[0]['data']) => createBooking({ data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['bookings', selectedDate] });
+    }
+  });
 
   const isSlotPast = (slot: string) => {
     const todayStr = new Date().toISOString().split('T')[0];
@@ -54,11 +77,6 @@ function Home() {
     const minutes = parseInt(minutesStr);
 
     // Determine if it's PM based on the slot context or hour
-    // In this specific app's slots:
-    // 07:00 - 11:45 are AM (7am - 11:45am)
-    // 01:20 - 06:00 are PM (1:20pm - 6:00pm)
-    // 06:05 - 12:20 are PM (6:05pm - 12:20am)
-    
     const isPM = hours < 7 || (hours >= 1 && hours <= 6) || (slot.includes('06:05') || slot.includes('07:40') || slot.includes('09:15') || slot.includes('10:50'));
     
     if (isPM && hours !== 12) {
@@ -82,14 +100,14 @@ function Home() {
       
       <main>
         <Hero onOpenBooking={() => setIsBookingOpen(true)} />
-        <Facilities />
-        <Gallery />
-        <Testimonials />
         <Pricing 
           onOpenBooking={() => setIsBookingOpen(true)} 
           daySlots={daySlots}
           nightSlots={nightSlots}
         />
+        <Facilities />
+        <Gallery />
+        <Testimonials />
         <FAQ />
       </main>
 
@@ -104,6 +122,8 @@ function Home() {
         nightSlots={nightSlots}
         existingBookings={existingBookings}
         isSlotPast={isSlotPast}
+        onBookingSubmit={(data) => bookingMutation.mutate(data)}
+        isSubmitting={bookingMutation.isPending}
       />
 
       {/* Floating WhatsApp */}

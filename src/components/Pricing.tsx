@@ -67,10 +67,10 @@ const PricingCard = ({ title, icon, price, regularPrice, slots, color, onBook, i
   const accentText = color === 'yellow' ? 'text-yellow-400' : 'text-blue-400';
 
   return (
-    <div className={`relative group transition-all duration-700 hover:-translate-y-4`}>
+    <div className={`relative group transition-all duration-700 hover:-translate-y-4 hover:z-10`}>
       {isPremium && (
         <div className="absolute -top-6 left-10 bg-lime-400 text-black px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest z-20 -rotate-3 shadow-[0_10px_30px_rgba(163,230,53,0.3)]">
-          Hottest Pick 🔥
+          Hottest Pick
         </div>
       )}
       

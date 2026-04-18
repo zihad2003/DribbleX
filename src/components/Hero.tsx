@@ -11,11 +11,19 @@ export const Hero = ({ onOpenBooking }: HeroProps) => {
       {/* Dynamic Background */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-slate-950/40 z-10"></div>
-        <img 
-          src="https://images.unsplash.com/photo-1556056504-5c7696c4c28d?q=80&w=2076&auto=format&fit=crop" 
-          alt="Arena Background"
-          className="w-full h-full object-cover animate-ken-burns"
-        />
+        <div className="w-full h-full bg-slate-900 animate-pulse absolute inset-0"></div> {/* Placeholder */}
+        <picture>
+          <source 
+            media="(max-width: 640px)" 
+            srcSet="https://images.unsplash.com/photo-1556056504-5c7696c4c28d?q=60&w=800&auto=format&fit=crop" 
+          />
+          <img 
+            src="https://images.unsplash.com/photo-1556056504-5c7696c4c28d?q=80&w=2076&auto=format&fit=crop" 
+            alt="Arena Background"
+            loading="eager"
+            className="w-full h-full object-cover animate-ken-burns relative z-10"
+          />
+        </picture>
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950 via-transparent to-slate-950 z-20"></div>
       </div>
 

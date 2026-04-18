@@ -1,22 +1,61 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { CheckCircle, XCircle, Clock, Phone, User, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
+import { useSuspenseQuery, useMutation, useQueryClient, queryOptions } from "@tanstack/react-query";
+import { getAllBookings, updateBookingStatus, deleteBooking } from "../server/bookings";
+import { CheckCircle, XCircle, Clock, Phone, User, Calendar as CalendarIcon, Loader2, Trash2 } from 'lucide-react';
 import * as React from 'react';
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 
 export const Route = createFileRoute('/admin')({
-  component: AdminPage,
+  component: AdminWrapper,
 })
 
-function AdminPage() {
-  // Mock data for frontend-only view
-  const [bookings, setBookings] = useState([
-    { id: 1, name: 'John Doe', phone: '01711111111', date: '2026-04-18', startTime: '07:00 - 08:30', duration: 1.5, status: 'pending' },
-    { id: 2, name: 'Jane Smith', phone: '01822222222', date: '2026-04-18', startTime: '08:35 - 10:05', duration: 1.5, status: 'confirmed' },
-    { id: 3, name: 'Mike Ross', phone: '01933333333', date: '2026-04-19', startTime: '06:05 - 07:35', duration: 1.5, status: 'cancelled' },
-  ]);
+function AdminWrapper() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <Loader2 className="w-10 h-10 text-lime-400 animate-spin" />
+      </div>
+    }>
+      <AdminPage />
+    </Suspense>
+  )
+}
 
-  const updateStatus = (id: number, status: string) => {
-    setBookings(bookings.map(b => b.id === id ? { ...b, status } : b));
+function AdminPage() {
+  const queryClient = useQueryClient();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [loginData, setLoginData] = useState({ email: '', password: '' });
+  const [error, setError] = useState('');
+
+  const adminBookingsQuery = queryOptions({
+    queryKey: ['admin', 'bookings'],
+    queryFn: () => getAllBookings(),
+  })
+
+  const { data: bookings = [] } = useSuspenseQuery(adminBookingsQuery);
+
+  const statusMutation = useMutation({
+    mutationFn: (data: Parameters<typeof updateBookingStatus>[0]['data']) => updateBookingStatus({ data }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'bookings'] });
+    }
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: number) => deleteBooking({ data: id }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['admin', 'bookings'] });
+    }
+  });
+
+  const handleLogin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (loginData.email === 'dribblex.turf' && loginData.password === '@dribblex2026') {
+      setIsAuthenticated(true);
+      setError('');
+    } else {
+      setError('Invalid credentials. Access denied.');
+    }
   };
 
   const stats = {
@@ -24,6 +63,65 @@ function AdminPage() {
     pending: bookings.filter((b: any) => b.status === 'pending').length,
     confirmed: bookings.filter((b: any) => b.status === 'confirmed').length,
   };
+
+  if (!isAuthenticated) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center p-6 font-sans">
+        <div className="w-full max-w-md bg-slate-900 border border-white/10 rounded-[2.5rem] p-10 shadow-2xl animate-fade-in">
+          <div className="text-center mb-10">
+            <div className="w-16 h-16 bg-lime-400 rounded-2xl flex items-center justify-center font-black text-black text-3xl italic mx-auto mb-6">D</div>
+            <h2 className="text-3xl font-black italic tracking-tighter text-white uppercase">Admin Access</h2>
+            <p className="text-slate-500 text-sm font-medium mt-2 uppercase tracking-widest">Restricted Area</p>
+          </div>
+
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 ml-2">User Identifier</label>
+              <input 
+                required
+                type="text" 
+                placeholder="EMAIL OR USERNAME"
+                value={loginData.email}
+                onChange={(e) => setLoginData({...loginData, email: e.target.value})}
+                className="w-full bg-slate-800 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-lime-400 transition-colors font-bold placeholder:text-slate-600"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-[10px] font-black uppercase tracking-[0.3em] text-slate-500 ml-2">Secure Key</label>
+              <input 
+                required
+                type="password" 
+                placeholder="••••••••"
+                value={loginData.password}
+                onChange={(e) => setLoginData({...loginData, password: e.target.value})}
+                className="w-full bg-slate-800 border border-white/10 rounded-2xl px-6 py-4 text-white focus:outline-none focus:border-lime-400 transition-colors font-bold placeholder:text-slate-600"
+              />
+            </div>
+
+            {error && (
+              <div className="bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold py-3 px-4 rounded-xl text-center uppercase tracking-wider">
+                {error}
+              </div>
+            )}
+
+            <button 
+              type="submit"
+              className="w-full py-5 bg-lime-400 text-black rounded-2xl font-black italic tracking-tighter uppercase hover:bg-lime-300 transition-all shadow-xl shadow-lime-400/20 active:scale-95"
+            >
+              Unlock Portal
+            </button>
+          </form>
+        </div>
+        <style>{`
+          @keyframes fade-in {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+          }
+          .animate-fade-in { animation: fade-in 0.4s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+        `}</style>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-slate-950 text-white p-4 md:p-8 font-sans">
@@ -108,7 +206,7 @@ function AdminPage() {
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         {booking.status !== 'confirmed' && (
                           <button 
-                            onClick={() => updateStatus(booking.id, 'confirmed')}
+                            onClick={() => statusMutation.mutate({ id: booking.id, status: 'confirmed' })}
                             className="p-2 bg-lime-400/10 text-lime-400 rounded-lg hover:bg-lime-400 hover:text-black transition-all"
                             title="Confirm Booking"
                           >
@@ -117,13 +215,24 @@ function AdminPage() {
                         )}
                         {booking.status !== 'cancelled' && (
                           <button 
-                            onClick={() => updateStatus(booking.id, 'cancelled')}
-                            className="p-2 bg-red-400/10 text-red-400 rounded-lg hover:bg-red-400 hover:text-white transition-all"
+                            onClick={() => statusMutation.mutate({ id: booking.id, status: 'cancelled' })}
+                            className="p-2 bg-yellow-400/10 text-yellow-400 rounded-lg hover:bg-yellow-400 hover:text-black transition-all"
                             title="Cancel Booking"
                           >
                             <XCircle className="w-5 h-5" />
                           </button>
                         )}
+                        <button 
+                          onClick={() => {
+                            if (confirm('Permanently delete this booking?')) {
+                              deleteMutation.mutate(booking.id);
+                            }
+                          }}
+                          className="p-2 bg-red-400/10 text-red-400 rounded-lg hover:bg-red-400 hover:text-white transition-all"
+                          title="Delete Permanently"
+                        >
+                          <Trash2 className="w-5 h-5" />
+                        </button>
                       </div>
                     </td>
                   </tr>

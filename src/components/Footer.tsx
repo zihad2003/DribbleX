@@ -94,10 +94,6 @@ export const Footer = ({ onOpenBooking }: { onOpenBooking: () => void }) => {
                   {link}
                 </a>
               ))}
-              <a href="/admin" className="hover:text-lime-400 transition-colors flex items-center gap-2 group">
-                <ArrowUpRight className="w-3 h-3 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-                Admin Portal
-              </a>
             </div>
           </div>
 

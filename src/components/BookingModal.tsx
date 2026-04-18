@@ -1,5 +1,5 @@
 import * as React from 'react';
-import { Calendar, CheckCircle2, X, Sun, Moon, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Calendar, CheckCircle2, X, Sun, Moon, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -10,6 +10,8 @@ interface BookingModalProps {
   nightSlots: string[];
   existingBookings: any[];
   isSlotPast: (slot: string) => boolean;
+  onBookingSubmit: (data: { name: string; phone: string; startTime: string; date: string; duration: number }) => void;
+  isSubmitting?: boolean;
 }
 
 export const BookingModal = ({ 
@@ -20,7 +22,9 @@ export const BookingModal = ({
   daySlots, 
   nightSlots, 
   existingBookings, 
-  isSlotPast 
+  isSlotPast,
+  onBookingSubmit,
+  isSubmitting = false
 }: BookingModalProps) => {
   const [step, setStep] = React.useState(1);
   const [formData, setFormData] = React.useState({
@@ -42,6 +46,13 @@ export const BookingModal = ({
     };
   }, [isOpen]);
 
+  // Handle successful submission external signal
+  React.useEffect(() => {
+    if (!isSubmitting && step === 2 && formData.name && formData.phone) {
+      // We don't automatically go to step 3 here because we need to know if the mutation was actually successful
+    }
+  }, [isSubmitting]);
+
   if (!isOpen) return null;
 
   const today = new Date().toISOString().split('T')[0];
@@ -49,7 +60,12 @@ export const BookingModal = ({
   const handleBookingSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.phone || !formData.startTime) return;
-    setStep(3);
+    
+    onBookingSubmit({
+      ...formData,
+      date: selectedDate
+    });
+    setStep(3); // Go to success view
   };
 
   const handleClose = () => {

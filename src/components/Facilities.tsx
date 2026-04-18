@@ -32,20 +32,20 @@ export const Facilities = () => {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
           {facilities.map((item, index) => (
             <div 
               key={index} 
-              className="group p-8 rounded-[2.5rem] bg-white/5 border border-white/5 hover:border-lime-400/30 transition-all duration-500 hover:-translate-y-2 relative overflow-hidden shadow-2xl"
+              className="group p-5 md:p-8 rounded-[1.5rem] md:rounded-[2.5rem] bg-white/5 border border-white/5 hover:border-lime-400/30 transition-all duration-500 hover:-translate-y-2 relative overflow-hidden shadow-2xl hover:z-10"
             >
               <div className="absolute inset-0 bg-gradient-to-br from-lime-400/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
               
               <div className="relative z-10">
-                <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-lime-400 mb-8 group-hover:bg-lime-400 group-hover:text-black transition-all duration-500 group-hover:scale-110 group-hover:rotate-6">
-                  <item.icon className="w-8 h-8" />
+                <div className="w-10 h-10 md:w-16 md:h-16 rounded-xl md:rounded-2xl bg-white/5 flex items-center justify-center text-lime-400 mb-4 md:mb-8 group-hover:bg-lime-400 group-hover:text-black transition-all duration-500 group-hover:scale-110 group-hover:rotate-6">
+                  <item.icon className="w-5 h-5 md:w-8 md:h-8" />
                 </div>
-                <h4 className="text-xl font-bold text-white mb-4 uppercase tracking-tight">{item.title}</h4>
-                <p className="text-slate-400 text-sm leading-relaxed font-medium">
+                <h4 className="text-xs md:text-xl font-bold text-white mb-2 md:mb-4 uppercase tracking-tight leading-tight">{item.title}</h4>
+                <p className="text-slate-400 text-[10px] md:text-sm leading-relaxed font-medium line-clamp-3 md:line-clamp-none">
                   {item.desc}
                 </p>
               </div>
