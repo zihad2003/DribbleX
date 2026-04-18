@@ -11,6 +11,10 @@ export default defineConfig({
       projects: ['./tsconfig.json'],
     }),
   ],
+  build: {
+    outDir: '.output/public',
+    emptyOutDir: true,
+  },
   optimizeDeps: {
     exclude: ['vite-plugin-pwa'],
   },
