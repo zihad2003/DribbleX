@@ -1,28 +1,23 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { useSuspenseQuery, useMutation, useQueryClient, queryOptions } from "@tanstack/react-query";
-import { getAllBookings, updateBookingStatus } from "../server/bookings";
-import { CheckCircle, XCircle, Clock, Phone, User, Calendar as CalendarIcon } from 'lucide-react';
+import { CheckCircle, XCircle, Clock, Phone, User, Calendar as CalendarIcon, Loader2 } from 'lucide-react';
+import * as React from 'react';
+import { useState } from 'react';
 
 export const Route = createFileRoute('/admin')({
   component: AdminPage,
 })
 
 function AdminPage() {
-  const queryClient = useQueryClient();
-  
-  const adminBookingsQuery = queryOptions({
-    queryKey: ['admin', 'bookings'],
-    queryFn: () => getAllBookings(),
-  })
+  // Mock data for frontend-only view
+  const [bookings, setBookings] = useState([
+    { id: 1, name: 'John Doe', phone: '01711111111', date: '2026-04-18', startTime: '07:00 - 08:30', duration: 1.5, status: 'pending' },
+    { id: 2, name: 'Jane Smith', phone: '01822222222', date: '2026-04-18', startTime: '08:35 - 10:05', duration: 1.5, status: 'confirmed' },
+    { id: 3, name: 'Mike Ross', phone: '01933333333', date: '2026-04-19', startTime: '06:05 - 07:35', duration: 1.5, status: 'cancelled' },
+  ]);
 
-  const { data: bookings } = useSuspenseQuery(adminBookingsQuery);
-
-  const statusMutation = useMutation({
-    mutationFn: (data: Parameters<typeof updateBookingStatus>[0]['data']) => updateBookingStatus({ data }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['admin', 'bookings'] });
-    }
-  });
+  const updateStatus = (id: number, status: string) => {
+    setBookings(bookings.map(b => b.id === id ? { ...b, status } : b));
+  };
 
   const stats = {
     total: bookings.length,
@@ -113,7 +108,7 @@ function AdminPage() {
                       <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         {booking.status !== 'confirmed' && (
                           <button 
-                            onClick={() => statusMutation.mutate({ id: booking.id, status: 'confirmed' })}
+                            onClick={() => updateStatus(booking.id, 'confirmed')}
                             className="p-2 bg-lime-400/10 text-lime-400 rounded-lg hover:bg-lime-400 hover:text-black transition-all"
                             title="Confirm Booking"
                           >
@@ -122,7 +117,7 @@ function AdminPage() {
                         )}
                         {booking.status !== 'cancelled' && (
                           <button 
-                            onClick={() => statusMutation.mutate({ id: booking.id, status: 'cancelled' })}
+                            onClick={() => updateStatus(booking.id, 'cancelled')}
                             className="p-2 bg-red-400/10 text-red-400 rounded-lg hover:bg-red-400 hover:text-white transition-all"
                             title="Cancel Booking"
                           >
