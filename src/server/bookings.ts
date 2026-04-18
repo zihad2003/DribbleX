@@ -100,3 +100,22 @@ export const updateBookingStatus = createServerFn({ method: 'POST' })
 
     return { success: true }
   })
+
+// Delete a booking
+export const deleteBooking = createServerFn({ method: 'POST' })
+  .handler(async ({ data: id }: { data: number }) => {
+    const event = getEvent()
+    const env = (event.context.cloudflare?.env || {}) as any
+    const db = env.DB as D1Database
+
+    if (!db) {
+      console.warn("DB binding not found.");
+      return { success: false };
+    }
+
+    await (db
+      .prepare('DELETE FROM bookings WHERE id = ?')
+      .bind(id) as any).run()
+
+    return { success: true }
+  })
