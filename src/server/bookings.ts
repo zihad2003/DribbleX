@@ -36,13 +36,10 @@ export const getBookingsByDate = createServerFn({ method: 'GET' })
       return [];
     }
 
-    const { results } = await (db
-      .prepare('SELECT * FROM bookings WHERE date = ? AND status != "cancelled"')
-      .bind(date) as any).all<Booking>()
-
+    const stmt = db.prepare('SELECT * FROM bookings WHERE date = ? AND status != "cancelled"').bind(date) as any
+    const { results } = await stmt.all() as { results: Booking[] }
     return results || []
   })
-
 // Create a new booking
 export const createBooking = createServerFn({ method: 'POST' })
   .validator((data: {
@@ -80,7 +77,7 @@ export const getAllBookings = createServerFn({ method: 'GET' })
     }
 
     const { results } = await (db
-      .prepare('SELECT * FROM bookings ORDER BY created_at DESC') as any).all<Booking>()
+      .prepare('SELECT * FROM bookings ORDER BY created_at DESC') as any).all() as { results: Booking[] }
 
     return results || []
   })
@@ -107,6 +104,7 @@ export const updateBookingStatus = createServerFn({ method: 'POST' })
 export const deleteBooking = createServerFn({ method: 'POST' })
   .validator((id: number) => id)
   .handler(async ({ data: id }) => {
+
     const db = getDB()
 
     if (!db) {
