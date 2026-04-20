@@ -4,7 +4,7 @@
   "sideEffects": false,
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "vinxi dev",
     "build": "vite build",
     "start": "wrangler pages dev .output/public",
     "format": "prettier --write .",
