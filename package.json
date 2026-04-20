@@ -5,7 +5,6 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "dev:ts": "tsc -b -w",
     "build": "vite build",
     "start": "wrangler pages dev .output/public",
     "format": "prettier --write .",

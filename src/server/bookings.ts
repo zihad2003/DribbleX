@@ -20,14 +20,25 @@ interface D1Database {
 
 // Helper to get DB from context
 function getDB() {
-  const event = getEvent()
-  const env = (event.context.cloudflare?.env || {}) as any
-  return env.DB as D1Database
+  try {
+    // Safety check for Vinxi/Nitro environment
+    if (typeof globalThis !== 'undefined' && !(globalThis as any).app) {
+      console.warn("getDB: Vinxi app not found on globalThis. Falling back to empty DB.");
+      return undefined;
+    }
+
+    const event = getEvent()
+    const env = (event.context.cloudflare?.env || event.context.h3Event?.context?.cloudflare?.env || {}) as any
+    return env.DB as D1Database
+  } catch (err) {
+    console.warn("getDB: Could not get Nitro event context.", err)
+    return undefined
+  }
 }
 
 // Fetch bookings for a specific date
 export const getBookingsByDate = createServerFn({ method: 'GET' })
-  .validator((date: string) => date)
+  .inputValidator((date: string) => date)
   .handler(async ({ data: date }) => {
     const db = getDB()
 
@@ -42,7 +53,7 @@ export const getBookingsByDate = createServerFn({ method: 'GET' })
   })
 // Create a new booking
 export const createBooking = createServerFn({ method: 'POST' })
-  .validator((data: {
+  .inputValidator((data: {
     name: string;
     phone: string;
     date: string;
@@ -84,7 +95,7 @@ export const getAllBookings = createServerFn({ method: 'GET' })
 
 // Update booking status
 export const updateBookingStatus = createServerFn({ method: 'POST' })
-  .validator((data: { id: number; status: string }) => data)
+  .inputValidator((data: { id: number; status: string }) => data)
   .handler(async ({ data }) => {
     const db = getDB()
 
@@ -102,7 +113,7 @@ export const updateBookingStatus = createServerFn({ method: 'POST' })
 
 // Delete a booking
 export const deleteBooking = createServerFn({ method: 'POST' })
-  .validator((id: number) => id)
+  .inputValidator((id: number) => id)
   .handler(async ({ data: id }) => {
 
     const db = getDB()

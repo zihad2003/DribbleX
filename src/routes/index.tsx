@@ -1,5 +1,4 @@
 import { createFileRoute } from '@tanstack/react-router'
-import * as React from "react";
 import { useState, Suspense } from "react";
 import { useSuspenseQuery, useMutation, queryOptions, useQueryClient } from "@tanstack/react-query";
 import { getBookingsByDate, createBooking } from "../server/bookings";

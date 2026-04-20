@@ -2,8 +2,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import { useSuspenseQuery, useMutation, useQueryClient, queryOptions } from "@tanstack/react-query";
 import { getAllBookings, updateBookingStatus, deleteBooking } from "../server/bookings";
 import { CheckCircle, XCircle, Clock, Phone, User, Calendar as CalendarIcon, Loader2, Trash2 } from 'lucide-react';
-import * as React from 'react';
-import { useState, Suspense } from 'react';
+import { useState, Suspense, type FormEvent } from 'react';
 
 export const Route = createFileRoute('/admin')({
   component: AdminWrapper,
@@ -48,7 +47,7 @@ function AdminPage() {
     }
   });
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = (e: FormEvent) => {
     e.preventDefault();
     if (loginData.email === 'dribblex.turf' && loginData.password === '@dribblex2026') {
       setIsAuthenticated(true);
