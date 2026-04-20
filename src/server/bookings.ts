@@ -28,10 +28,18 @@ function getDB() {
     }
 
     const event = getEvent()
+    if (!event) return undefined
+
     const env = (event.context.cloudflare?.env || event.context.h3Event?.context?.cloudflare?.env || {}) as any
-    return env.DB as D1Database
+    const db = env.DB as D1Database
+    
+    if (db && typeof db.prepare === 'function') {
+      return db
+    }
+
+    return undefined
   } catch (err) {
-    console.warn("getDB: Could not get Nitro event context.", err)
+    console.warn("getDB: Could not get Nitro event context or DB binding.", err)
     return undefined
   }
 }
