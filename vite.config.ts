@@ -6,13 +6,23 @@ import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 
 export default defineConfig({
   plugins: [
-    tanstackStart({
-      target: 'cloudflare-pages',
-    }),
+    tanstackStart(),
     react(),
     tailwindcss(),
     tsConfigPaths({
       projects: ['./tsconfig.json'],
     }),
   ],
+  environments: {
+    client: {
+      build: {
+        outDir: '.output/public',
+      },
+    },
+    ssr: {
+      build: {
+        outDir: '.output/server',
+      },
+    },
+  },
 })
