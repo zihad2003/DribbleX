@@ -15,17 +15,4 @@ export default defineConfig({
       projects: ['./tsconfig.json'],
     }),
   ],
-  environments: {
-    client: {
-      build: {
-        outDir: '.output/public',
-      },
-    },
-    ssr: {
-      build: {
-        outDir: '.output/server',
-      },
-    },
-  },
 })
-
