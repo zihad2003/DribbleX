@@ -26,6 +26,11 @@ function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     <html>
       <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.__name = window.__name || ((fn) => fn); window.__name2 = window.__name2 || ((fn) => fn);`,
+          }}
+        />
         <HeadContent />
       </head>
       <body>
