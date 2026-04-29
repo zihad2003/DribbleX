@@ -22,6 +22,11 @@ export default defineConfig({
     ssr: {
       build: {
         outDir: '.output/server',
+        rollupOptions: {
+          output: {
+            inlineDynamicImports: true,
+          },
+        },
       },
     },
   },
